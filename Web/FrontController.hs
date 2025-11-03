@@ -4,7 +4,9 @@ import IHP.LoginSupport.Middleware
 import IHP.RouterPrelude
 import Web.Controller.Prelude
 import Web.Controller.Sessions
+import Web.Controller.Upvotes
 -- Controller Imports
+import Web.Controller.Comments
 import Web.Controller.Posts
 import Web.Controller.Users
 import Web.Controller.Static
@@ -15,8 +17,10 @@ instance FrontController WebApplication where
     [ startPage WelcomeAction,
       parseRoute @SessionsController
       -- Generator Marker
+        , parseRoute @CommentsController
         , parseRoute @PostsController
         , parseRoute @UsersController
+        , parseRoute @UpvotesController
     ]
 
 instance InitControllerContext WebApplication where

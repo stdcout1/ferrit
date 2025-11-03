@@ -10,15 +10,26 @@ import qualified Text.MMark as MMark
 instance Controller PostsController where
     beforeAction = ensureIsUser
     action PostsAction = do
-        posts <- query @Post |> fetch >>= collectionFetchRelated #userId
+        posts <- query @Post 
+              |> fetch 
+              >>= collectionFetchRelated #userId 
+              >>= collectionFetchRelated #upvotes
         render IndexView { .. }
 
     action NewPostAction = do
-        let post = newRecord
-        render NewView { .. }
+        let mParentId :: Maybe (Id Post) = paramOrNothing "parentId"
+        case mParentId of
+            Just pid -> do
+                parentPost <- fetch pid
+                let post = newRecord |> set #parentId mParentId 
+                render NewView { post, parentPost = Just parentPost }
+            Nothing -> do
+                let post = newRecord @Post
+                render NewView { post, parentPost = Nothing }
 
     action ShowPostAction { postId } = do
         post <- fetch postId
+        allPosts <- query @Post |> fetch
         render ShowView { .. }
 
     action EditPostAction { postId } = do
@@ -42,7 +53,11 @@ instance Controller PostsController where
         post
             |> buildPost
             |> ifValid \case
-                Left post -> render NewView { .. } 
+                Left post -> do
+                    parentPost <- case post.parentId of
+                        Just pid -> Just <$> fetch pid
+                        Nothing -> pure Nothing
+                    render NewView { post, parentPost }
                 Right post -> do
                     post <- post |> set #userId currentUser.id |> createRecord
                     setSuccessMessage "Post created"
@@ -62,7 +77,7 @@ isMarkdown text =
 
 
 buildPost post = post
-    |> fill @'["title", "body"]
+    |> fill @'["title", "body", "parentId"]
     |> validateField #title nonEmpty
     |> validateField #body nonEmpty
     |> validateField #body isMarkdown

@@ -15,6 +15,11 @@ instance HasNewSessionUrl User where
 
 type instance CurrentUserRecord = User
 
+data UpvotesController
+    = UpvotePostAction {postId :: !(Id Post)}
+    | CreateUpvoteAction 
+    deriving (Eq, Show, Data)
+
 data SessionsController
     = NewSessionAction
     | CreateSessionAction
@@ -33,10 +38,20 @@ data UsersController
 
 data PostsController
     = PostsAction
-    | NewPostAction
+    | NewPostAction 
     | ShowPostAction { postId :: !(Id Post) }
     | CreatePostAction
     | EditPostAction { postId :: !(Id Post) }
     | UpdatePostAction { postId :: !(Id Post) }
     | DeletePostAction { postId :: !(Id Post) }
+    deriving (Eq, Show, Data)
+
+data CommentsController
+    = CommentsAction
+    | NewCommentAction
+    | ShowCommentAction { commentId :: !(Id Post) }
+    | CreateCommentAction
+    | EditCommentAction { commentId :: !(Id Post) }
+    | UpdateCommentAction { commentId :: !(Id Post) }
+    | DeleteCommentAction { commentId :: !(Id Post) }
     deriving (Eq, Show, Data)

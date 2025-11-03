@@ -17,9 +17,21 @@ CREATE TABLE posts (
     body TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     user_id UUID NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    parent_id UUID DEFAULT NULL
 );
 CREATE INDEX posts_created_at_index ON posts (created_at);
 CREATE INDEX posts_user_id_index ON posts (user_id);
 CREATE TRIGGER update_posts_updated_at BEFORE UPDATE ON posts FOR EACH ROW EXECUTE FUNCTION set_updated_at_to_now();
+CREATE TABLE upvotes (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY NOT NULL,
+    user_id UUID NOT NULL,
+    post_id UUID NOT NULL,
+    UNIQUE (user_id, post_id)
+);
+CREATE INDEX upvotes_user_id_index ON upvotes (user_id);
+CREATE INDEX upvotes_post_id_index ON upvotes (post_id);
+ALTER TABLE posts ADD CONSTRAINT posts_ref_parent_id FOREIGN KEY (parent_id) REFERENCES posts (id) ON DELETE NO ACTION;
 ALTER TABLE posts ADD CONSTRAINT posts_ref_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION;
+ALTER TABLE upvotes ADD CONSTRAINT upvotes_ref_post_id FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE NO ACTION;
+ALTER TABLE upvotes ADD CONSTRAINT upvotes_ref_user_id FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE NO ACTION;
