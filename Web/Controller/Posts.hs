@@ -14,6 +14,8 @@ instance Controller PostsController where
               |> fetch 
               >>= collectionFetchRelated #userId 
               >>= collectionFetchRelated #upvotes
+              >>= collectionFetchRelated #downvotes
+
         render IndexView { .. }
 
     action NewPostAction = do

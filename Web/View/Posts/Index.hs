@@ -3,7 +3,7 @@ import Web.View.Prelude
 
 import qualified Text.MMark as MMark
 
-data IndexView = IndexView { posts :: [Include "upvotes" (Include "userId" Post)]}
+data IndexView = IndexView { posts :: [Include "downvotes" (Include "upvotes" (Include "userId" Post))]}
 
 instance View IndexView where
     html IndexView { .. } = [hsx|
@@ -21,7 +21,7 @@ instance View IndexView where
                 ]
             newPostPath = pathTo NewPostAction
 
-renderPost :: (Include "upvotes" (Include "userId" Post)) -> Html
+renderPost :: (Include "downvotes" (Include "upvotes" (Include "userId" Post))) -> Html
 renderPost post = [hsx|
     <div class="card mb-3 shadow-sm">
         <div class="card-body">
@@ -33,8 +33,12 @@ renderPost post = [hsx|
             </div>
 
             <p class="card-text">{post.body |> renderMarkdown}</p>
-            {renderUpvoteButton post}
+            <div class="d-flex justify-content-start gap-3">
+                {renderUpvoteButton post}
+                {renderDownvoteButton post}
+            </div>
             <span class="text-muted">Upvotes: {length post.upvotes}</span>
+            <span class="text-muted">Downvotes: {length post.downvotes}</span>
             <div class="d-flex justify-content-end gap-3">
                 <a href={ShowPostAction post.id} class="btn btn-sm btn-primary">Show</a>
                 {renderButtons}
@@ -51,13 +55,24 @@ renderPost post = [hsx|
                     else 
                         [hsx||]
 
-renderUpvoteButton :: Include "upvotes" (Include "userId" Post) -> Html
+renderUpvoteButton :: (Include "downvotes" (Include "upvotes" (Include "userId" Post)))-> Html
 renderUpvoteButton post =
     let upvote = newRecord @Upvote |> set #postId post.id
     in formFor upvote [hsx|
         {(hiddenField #postId)}
         {submitButton {
             label = ("👍 " ),
+            buttonClass = "btn btn-outline-primary btn-sm"
+        }}
+    |]
+
+renderDownvoteButton :: (Include "downvotes" (Include "upvotes" (Include "userId" Post)))-> Html
+renderDownvoteButton post =
+    let downvote = newRecord @Downvote |> set #postId post.id
+    in formFor downvote [hsx|
+        {(hiddenField #postId)}
+        {submitButton {
+            label = ("👎 " ),
             buttonClass = "btn btn-outline-primary btn-sm"
         }}
     |]

@@ -20,6 +20,11 @@ data UpvotesController
     | CreateUpvoteAction 
     deriving (Eq, Show, Data)
 
+data DownvotesController
+    = DownvotePostAction {postId :: !(Id Post)}
+    | CreateDownvoteAction 
+    deriving (Eq, Show, Data)
+
 data SessionsController
     = NewSessionAction
     | CreateSessionAction

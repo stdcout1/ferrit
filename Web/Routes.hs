@@ -15,6 +15,7 @@ instance AutoRoute UsersController
 instance AutoRoute PostsController
 
 instance AutoRoute UpvotesController
+instance AutoRoute DownvotesController
 
 
 instance AutoRoute CommentsController
